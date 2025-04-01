@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import { register } from '@/api';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -39,9 +40,9 @@ const RegisterForm = () => {
     setLoading(true);
     
     try {
-      // In a real implementation, this would call an API endpoint
-      // For now, let's simulate a successful registration
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Register user via API
+      const { confirmPassword, ...registerData } = formData;
+      await register(registerData);
       
       toast({
         title: "Registration successful!",
@@ -50,10 +51,11 @@ const RegisterForm = () => {
       });
       
       navigate('/login');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Registration error:', error);
       toast({
         title: "Registration failed",
-        description: "There was an error during registration. Please try again.",
+        description: error.response?.data?.message || "There was an error during registration. Please try again.",
         variant: "destructive",
         duration: 3000,
       });

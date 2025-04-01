@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import { login } from '@/api';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -26,9 +27,11 @@ const LoginForm = () => {
     setLoading(true);
     
     try {
-      // In a real implementation, this would call an API endpoint
-      // For now, let's simulate a successful login
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await login(formData);
+      
+      // Store auth token and user data
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       
       toast({
         title: "Logged in successfully!",
@@ -37,10 +40,11 @@ const LoginForm = () => {
       });
       
       navigate('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description: error.response?.data?.message || "Invalid email or password. Please try again.",
         variant: "destructive",
         duration: 3000,
       });

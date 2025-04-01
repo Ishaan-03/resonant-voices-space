@@ -1,50 +1,95 @@
+import { useState, useEffect } from 'react';
 import { Clock, Heart, MessageSquare, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// Sample data for featured posts
-const featuredPosts = [
-  {
-    id: '1',
-    title: 'The Art of Mindful Writing: Finding Your Voice in a Noisy World',
-    excerpt: 'Discover how mindfulness can transform your writing process and help you connect with readers on a deeper level.',
-    category: 'Creativity',
-    author: {
-      name: 'Emma Wilson',
-      image: '/placeholder.svg'
-    },
-    readTime: '5 min read',
-    likes: 124,
-    comments: 32
-  },
-  {
-    id: '2',
-    title: 'Beyond Text: How Multimedia is Reshaping Digital Storytelling',
-    excerpt: 'Explore how audio, video, and interactive elements are creating new possibilities for content creators.',
-    category: 'Digital Media',
-    author: {
-      name: 'Marcus Chen',
-      image: '/placeholder.svg'
-    },
-    readTime: '7 min read',
-    likes: 98,
-    comments: 24
-  },
-  {
-    id: '3',
-    title: 'The Psychology of Engagement: Why Some Ideas Spread and Others Don\'t',
-    excerpt: 'Understanding the cognitive and emotional factors that determine which content resonates with audiences.',
-    category: 'Psychology',
-    author: {
-      name: 'Sophia Ahmed',
-      image: '/placeholder.svg'
-    },
-    readTime: '6 min read',
-    likes: 156,
-    comments: 41
-  }
-];
+import { getPosts } from '@/api';
 
 const FeaturedPostsSection = () => {
+  const [featuredPosts, setFeaturedPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await getPosts();
+        // Get only the first 3 posts for the featured section
+        setFeaturedPosts(response.data.slice(0, 3));
+        setLoading(false);
+      } catch (err: any) {
+        console.error('Error fetching posts:', err);
+        setError(err.message || 'Failed to load posts');
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-20 px-4 bg-gradient-to-b from-black/80 to-black/50">
+        <div className="container mx-auto text-center">
+          <p className="text-white">Loading featured posts...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-20 px-4 bg-gradient-to-b from-black/80 to-black/50">
+        <div className="container mx-auto text-center">
+          <p className="text-white">Error loading posts. Please try again later.</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Fallback to sample data if no posts are available
+  if (featuredPosts.length === 0) {
+    const featuredPosts = [
+      {
+        id: '1',
+        title: 'The Art of Mindful Writing: Finding Your Voice in a Noisy World',
+        excerpt: 'Discover how mindfulness can transform your writing process and help you connect with readers on a deeper level.',
+        category: 'Creativity',
+        author: {
+          name: 'Emma Wilson',
+          image: '/placeholder.svg'
+        },
+        readTime: '5 min read',
+        likes: 124,
+        comments: 32
+      },
+      {
+        id: '2',
+        title: 'Beyond Text: How Multimedia is Reshaping Digital Storytelling',
+        excerpt: 'Explore how audio, video, and interactive elements are creating new possibilities for content creators.',
+        category: 'Digital Media',
+        author: {
+          name: 'Marcus Chen',
+          image: '/placeholder.svg'
+        },
+        readTime: '7 min read',
+        likes: 98,
+        comments: 24
+      },
+      {
+        id: '3',
+        title: 'The Psychology of Engagement: Why Some Ideas Spread and Others Don\'t',
+        excerpt: 'Understanding the cognitive and emotional factors that determine which content resonates with audiences.',
+        category: 'Psychology',
+        author: {
+          name: 'Sophia Ahmed',
+          image: '/placeholder.svg'
+        },
+        readTime: '6 min read',
+        likes: 156,
+        comments: 41
+      }
+    ];
+  }
+
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-black/80 to-black/50">
       <div className="container mx-auto">
@@ -78,7 +123,7 @@ const FeaturedPostsSection = () => {
                     {post.category}
                   </span>
                   <span className="ml-3 flex items-center text-sm text-white/60">
-                    <Clock className="h-4 w-4 mr-1" /> {post.readTime}
+                    <Clock className="h-4 w-4 mr-1" /> {post.readTime || '5 min read'}
                   </span>
                 </div>
                 
@@ -95,21 +140,21 @@ const FeaturedPostsSection = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <img 
-                      src={post.author.image} 
-                      alt={post.author.name}
+                      src={post.author?.image || "/placeholder.svg"} 
+                      alt={post.author?.name}
                       className="h-10 w-10 rounded-full bg-white/10 mr-3"
                     />
                     <span className="font-medium text-white">
-                      {post.author.name}
+                      {post.author?.name}
                     </span>
                   </div>
                   
                   <div className="flex items-center space-x-4">
                     <span className="flex items-center text-white/60">
-                      <Heart className="h-4 w-4 mr-1" /> {post.likes}
+                      <Heart className="h-4 w-4 mr-1" /> {post.likeCount || 0}
                     </span>
                     <span className="flex items-center text-white/60">
-                      <MessageSquare className="h-4 w-4 mr-1" /> {post.comments}
+                      <MessageSquare className="h-4 w-4 mr-1" /> {post.commentCount || 0}
                     </span>
                   </div>
                 </div>
