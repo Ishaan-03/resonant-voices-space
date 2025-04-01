@@ -1,5 +1,4 @@
-
-import { Clock, Heart, MessageSquare } from 'lucide-react';
+import { Clock, Heart, MessageSquare, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 // Sample data for featured posts
